@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 
 public class MainActivity extends Activity {
+
+    private static final String TAG = "SmartFS";
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -28,6 +32,21 @@ public class MainActivity extends Activity {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerView.OnItemTouchListener() {
+                    @Override
+                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onInterceptTouchEvent");
+                        return false;
+                    }
+
+                    @Override
+                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onTouchEvent");
+                    }
+                }
+        );
 
         // specify an adapter (see also next example)
         String[] mDataset = {"FileOne", "FileTwo"};
