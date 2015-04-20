@@ -9,6 +9,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+
+import geekomaniacs.smartfs.beans.SmartFSFile;
+import geekomaniacs.smartfs.utility.Utility;
+
 
 public class MainActivity extends Activity {
 
@@ -49,7 +54,7 @@ public class MainActivity extends Activity {
         );
 
         // specify an adapter (see also next example)
-        String[] mDataset = {"FileOne", "FileTwo"};
+        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
         mAdapter = new MyAdapter(mDataset);
         mRecyclerView.setAdapter(mAdapter);
     }
