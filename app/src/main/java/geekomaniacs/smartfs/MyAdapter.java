@@ -1,10 +1,13 @@
 package geekomaniacs.smartfs;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -15,22 +18,20 @@ import geekomaniacs.smartfs.beans.SmartFSFile;
  */
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private ArrayList<SmartFSFile> mDataset;
-
+    static Context context;
+    ContextMenu.ContextMenuInfo info;
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TextView mTextView;
-        public ViewHolder(TextView v) {
-            super(v);
-            mTextView = v;
-        }
-    }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(ArrayList<SmartFSFile> myDataset) {
+    public MyAdapter(ArrayList<SmartFSFile> myDataset, Context context) {
         mDataset = myDataset;
+        this.context = context;
+    }
+
+    public MyAdapter(){
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -59,4 +60,29 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public int getItemCount() {
         return mDataset.size();
     }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener{
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+            v.setOnClickListener(this);
+            v.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(MyAdapter.context,"Clicked", Toast.LENGTH_LONG);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            new MyAdapter().info = menuInfo;
+            menu.setHeaderTitle("Select an Action");
+            menu.add(0, R.id.share, 0, "Share");
+            menu.add(0, R.id.delete, 0, "Delete");
+        }
+    }
+
 }

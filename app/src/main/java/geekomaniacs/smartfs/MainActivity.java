@@ -2,13 +2,18 @@ package geekomaniacs.smartfs;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.PopupMenu;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.beans.SmartFSFile;
@@ -38,25 +43,34 @@ public class MainActivity extends Activity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mRecyclerView.addOnItemTouchListener(
-                new RecyclerView.OnItemTouchListener() {
-                    @Override
-                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                        Log.v(TAG, "onInterceptTouchEvent");
-                        return false;
-                    }
-
-                    @Override
-                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                        Log.v(TAG, "onTouchEvent");
-                    }
-                }
-        );
+//        mRecyclerView.addOnItemTouchListener(
+//                new RecyclerView.OnItemTouchListener() {
+//                    @Override
+//                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+//                        Log.v(TAG, "onInterceptTouchEvent");
+//                        showPopUp(recyclerView);
+//                        onTouchEvent(recyclerView, motionEvent);
+//                        return true;
+//                    }
+//
+//                    @Override
+//                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+//                        Log.v(TAG, "onTouchEvent");
+//                        showPopUp(recyclerView);
+//
+//                    }
+//                }
+//        );
 
         // specify an adapter (see also next example)
         ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-        mAdapter = new MyAdapter(mDataset);
+//        ArrayList<SmartFSFile> mDataset = new ArrayList<SmartFSFile>();
+//        mDataset.add(new SmartFSFile(new File("ABC")));
+//        mDataset.add(new SmartFSFile(new File("BCD")));
+
+        mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
 
@@ -80,5 +94,11 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showPopUp(View view){
+        PopupMenu popUp = new PopupMenu(this, view);
+        popUp.inflate(R.menu.pop_up_menu);
+        popUp.show();
     }
 }
