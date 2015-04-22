@@ -2,6 +2,7 @@ package geekomaniacs.smartfs;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +28,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     // Provide a suitable constructor (depends on the kind of dataset)
     public MyAdapter(ArrayList<SmartFSFile> myDataset, Context context) {
         mDataset = myDataset;
-        this.context = context;
+        MyAdapter.context = context;
     }
 
     public MyAdapter(){
@@ -73,7 +74,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(MyAdapter.context,"Clicked", Toast.LENGTH_LONG);
+            Toast.makeText(MyAdapter.context,"Clicked", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -82,6 +83,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             menu.setHeaderTitle("Select an Action");
             menu.add(0, R.id.share, 0, "Share");
             menu.add(0, R.id.delete, 0, "Delete");
+            Log.v(MainActivity.TAG, mTextView.getText().toString());
         }
     }
 

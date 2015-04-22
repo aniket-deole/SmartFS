@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 
+import geekomaniacs.smartfs.MainActivity;
 import geekomaniacs.smartfs.beans.SmartFSFile;
 
 /**
@@ -18,12 +19,17 @@ public class Utility {
     public static ArrayList<SmartFSFile> getFileList(){
         ArrayList<SmartFSFile> smartFSFiles = new ArrayList<SmartFSFile>();
         String path = Environment.getExternalStorageDirectory().toString() + SMART_FS_DIRECTORY;
-        Log.d("Files", "Path: " + path);
+        Log.d(MainActivity.TAG, "Path: " + path);
         File smartFSDirectory = new File(path);
-        if(!smartFSDirectory.exists())
-            smartFSDirectory.mkdir();
+        if(!smartFSDirectory.exists()) {
+            if (!smartFSDirectory.mkdir()) {
+                Log.d (MainActivity.TAG, "Cannot Create SmartFS Directory");
+            }
+        }
         File files[] = smartFSDirectory.listFiles();
-        Log.d("Files", "Size: " + files.length);
+        if (files == null)
+            return smartFSFiles;
+        Log.d(MainActivity.TAG, "Size: " + files.length);
         for(int i=0; i <files.length; i++){
             Log.d("Files", "FileName: "+files[i].getName());
             smartFSFiles.add(new SmartFSFile(files[i]));
