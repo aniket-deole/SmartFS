@@ -11,16 +11,13 @@ import android.support.v7.widget.RecyclerView;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,11 +35,10 @@ import geekomaniacs.smartfs.utility.Utility;
 public class MainActivity extends Activity {
 
     public static final String TAG = "SmartFS";
-
+    private static final Integer SERVER_PORT = 10000;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private static final Integer SERVER_PORT = 10000;
     private int myPort;
 
     @Override

@@ -1,34 +1,37 @@
 package geekomaniacs.smartfs.beans;
 
-import org.json.JSONObject;
-
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.RandomAccessFile;
 
 /**
  * Created by imbapumba on 4/20/15.
  */
 public class SmartFSFile {
-    private File file;
+    private RandomAccessFile file;
     private String metadata;
 
-    public SmartFSFile(File file){
-        this.file = file;
+    public SmartFSFile(File file) throws FileNotFoundException {
+        // If synchronous required, check file modes from here:
+        // http://docs.oracle.com/javase/7/docs/api/java/io/
+        // RandomAccessFile.html#RandomAccessFile(java.io.File,%20java.lang.String)
+        this.file = new RandomAccessFile(file, "rw");
         //initialize metadata
     }
 
-    public File getFile(){
+    public RandomAccessFile getFile() {
         return this.file;
     }
 
-    public String getMetadata(){
-        return this.metadata;
-    }
-
-    public void setFile(File file){
+    public void setFile(RandomAccessFile file) {
         this.file = file;
     }
 
-    public void setMetadata(String metadata){
+    public String getMetadata() {
+        return this.metadata;
+    }
+
+    public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
 }
