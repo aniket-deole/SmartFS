@@ -8,22 +8,24 @@ import java.io.RandomAccessFile;
  * Created by imbapumba on 4/20/15.
  */
 public class SmartFSFile {
-    private RandomAccessFile file;
+    private File file;
+    private RandomAccessFile rafFile;
     private String metadata;
 
     public SmartFSFile(File file) throws FileNotFoundException {
         // If synchronous required, check file modes from here:
         // http://docs.oracle.com/javase/7/docs/api/java/io/
         // RandomAccessFile.html#RandomAccessFile(java.io.File,%20java.lang.String)
-        this.file = new RandomAccessFile(file, "rw");
+        this.rafFile = new RandomAccessFile(file, "rw");
+        this.file = file;
         //initialize metadata
     }
 
-    public RandomAccessFile getFile() {
+    public File getFile() {
         return this.file;
     }
 
-    public void setFile(RandomAccessFile file) {
+    public void setFile(File file) {
         this.file = file;
     }
 
@@ -34,4 +36,6 @@ public class SmartFSFile {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+
+    public RandomAccessFile getRAFFile () { return this.rafFile; }
 }

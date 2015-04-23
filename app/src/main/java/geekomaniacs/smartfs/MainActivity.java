@@ -94,13 +94,13 @@ public class MainActivity extends Activity {
 
         if (myPort == 11108) {
             new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                   null );
+                    null);
         } else {
             ServerSocket serverSocket = null;
             try {
                 serverSocket = new ServerSocket(SERVER_PORT);
             } catch (IOException e) {
-                Log.v (TAG, "ServerSocket error", e);
+                Log.v(TAG, "ServerSocket error", e);
             }
             new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                     serverSocket);
@@ -131,87 +131,87 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void showPopUp(View view){
+    public void showPopUp(View view) {
         PopupMenu popUp = new PopupMenu(this, view);
         popUp.inflate(R.menu.pop_up_menu);
         popUp.show();
     }
 
-    public class ServerSocketListener extends AsyncTask <ServerSocket, Void, Void> {
+    public class ServerSocketListener extends AsyncTask<ServerSocket, Void, Void> {
 
         @Override
         protected Void doInBackground(ServerSocket... params) {
             while (true) {
                 try {
-                    Log.v (TAG, "SSLDB: Waiting for socket");
+                    Log.v(TAG, "SSLDB: Waiting for socket");
                     Socket socket = params[0].accept();
-                    File file = new File (Environment.getExternalStorageDirectory().toString()
+                    File file = new File(Environment.getExternalStorageDirectory().toString()
                             + Utility.SMART_FS_DIRECTORY +
                             File.separator + "testReceived");
-                    Log.v (TAG, "SSLDB: File Created");
-                    byte [] mybytearray  = new byte [10485760];
+                    Log.v(TAG, "SSLDB: File Created");
+                    byte[] mybytearray = new byte[10485760];
                     InputStream is = socket.getInputStream();
                     FileOutputStream fos = new FileOutputStream(file);
                     BufferedOutputStream bos = new BufferedOutputStream(fos);
-                    int bytesRead = is.read(mybytearray,0,mybytearray.length);
+                    int bytesRead = is.read(mybytearray, 0, mybytearray.length);
                     int current = bytesRead;
 
                     do {
                         bytesRead =
-                                is.read(mybytearray, current, (mybytearray.length-current));
-                        if(bytesRead >= 0) current += bytesRead;
-                        Log.v (TAG, "SSLDB: " + bytesRead + " bytes written");
-                    } while(bytesRead > 0);
+                                is.read(mybytearray, current, (mybytearray.length - current));
+                        if (bytesRead >= 0) current += bytesRead;
+                        Log.v(TAG, "SSLDB: " + bytesRead + " bytes written");
+                    } while (bytesRead > 0);
 
-                    bos.write(mybytearray, 0 , current);
+                    bos.write(mybytearray, 0, current);
                     bos.flush();
-                    Log.v (TAG, "SSLDB: File Write Done");
+                    Log.v(TAG, "SSLDB: File Write Done");
 
                     socket.close();
                     bos.close();
 
                 } catch (IOException e) {
-                    Log.e (TAG, "SSLDB:", e);
+                    Log.e(TAG, "SSLDB:", e);
                 }
             }
         }
     }
 
-    public class FileTransfer extends AsyncTask <Void, Void, Void> {
+    public class FileTransfer extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
                 Thread.sleep(15000);
             } catch (InterruptedException e) {
-                Log.v (TAG, "FTDIB: ", e);
+                Log.v(TAG, "FTDIB: ", e);
             }
 
-            File file = new File (Environment.getExternalStorageDirectory().toString()
+            File file = new File(Environment.getExternalStorageDirectory().toString()
                     + Utility.SMART_FS_DIRECTORY +
                     File.separator + "test");
             if (!file.exists()) {
-                Log.v (TAG, "The file cannot be found.");
+                Log.v(TAG, "The file cannot be found.");
                 return null;
             } else {
-                Log.v (TAG, "The test file exists. Beginning to transfer file.");
+                Log.v(TAG, "The test file exists. Beginning to transfer file.");
             }
 
             try {
-                Socket socket = new Socket (InetAddress.getByAddress(new byte[]{10, 0, 2, 2}),
+                Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}),
                         11112);
 
-                byte [] mybytearray  = new byte [(int)file.length()];
+                byte[] mybytearray = new byte[(int) file.length()];
                 BufferedInputStream bis = new BufferedInputStream(
                         new FileInputStream(file));
-                int result = bis.read(mybytearray,0,mybytearray.length);
-                Log.v (TAG, "FTDIB: Number of bytes read/shoudldRead:" + result + ":" +
-                    file.length ());
+                int result = bis.read(mybytearray, 0, mybytearray.length);
+                Log.v(TAG, "FTDIB: Number of bytes read/shoudldRead:" + result + ":" +
+                        file.length());
 
                 socket.getOutputStream().write(mybytearray,
                         0, mybytearray.length);
                 socket.getOutputStream().flush();
-                Log.v (TAG, "FTDIB: File Writing Done.");
+                Log.v(TAG, "FTDIB: File Writing Done.");
                 socket.close();
 
                 bis.close();
@@ -219,7 +219,7 @@ public class MainActivity extends Activity {
                 return null;
 
             } catch (IOException e) {
-                Log.e (TAG, "FTDIB:", e);
+                Log.e(TAG, "FTDIB:", e);
             }
 
             return null;
