@@ -16,6 +16,10 @@ import geekomaniacs.smartfs.beans.SmartFSFile;
 public class Utility {
 
     public static final String SMART_FS_DIRECTORY = "/SmartFS";
+    public static final String SELECT_ACTION = "Select an action";
+    public static final String SHARE = "Share";
+    public static final String DELETE = "Delete";
+    public static int position;
 
     public static ArrayList<SmartFSFile> getFileList() {
         ArrayList<SmartFSFile> smartFSFiles = new ArrayList<SmartFSFile>();

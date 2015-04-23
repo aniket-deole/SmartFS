@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -13,12 +15,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.beans.SmartFSFile;
+import geekomaniacs.smartfs.utility.Utility;
 
 /**
  * Created by aniket on 4/13/15.
  */
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-    private ArrayList<SmartFSFile> mDataset;
+    ArrayList<SmartFSFile> mDataset;
     static Context context;
     ContextMenu.ContextMenuInfo info;
     // Provide a reference to the views for each data item
@@ -75,16 +78,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             Toast.makeText(MyAdapter.context,"Clicked", Toast.LENGTH_SHORT).show();
+            Log.d("Position", String.valueOf(getPosition()));
         }
 
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             new MyAdapter().info = menuInfo;
-            menu.setHeaderTitle("Select an Action");
-            menu.add(0, R.id.share, 0, "Share");
-            menu.add(0, R.id.delete, 0, "Delete");
-            Log.v(MainActivity.TAG, mTextView.getText().toString());
+            menu.setHeaderTitle(Utility.SELECT_ACTION);
+            menu.add(0, R.id.share, 0, Utility.SHARE);
+            menu.add(0, R.id.delete, 0, Utility.DELETE);
+            Log.v(MainActivity.TAG, String.valueOf(getPosition()));
+            Utility.position = getPosition();
         }
+
     }
 
 }

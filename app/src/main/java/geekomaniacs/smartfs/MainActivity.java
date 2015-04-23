@@ -20,6 +20,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,7 @@ public class MainActivity extends Activity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private int myPort;
+    ArrayList<SmartFSFile> mDataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,10 +78,14 @@ public class MainActivity extends Activity {
 //        );
 
         // specify an adapter (see also next example)
-        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-//        ArrayList<SmartFSFile> mDataset = new ArrayList<SmartFSFile>();
-//        mDataset.add(new SmartFSFile(new File("ABC")));
-//        mDataset.add(new SmartFSFile(new File("BCD")));
+//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+        mDataset = new ArrayList<SmartFSFile>();
+        try{
+            mDataset.add(new SmartFSFile(new File("ABC")));
+            mDataset.add(new SmartFSFile(new File("BCD")));
+        }catch(FileNotFoundException e){
+            Log.e("No file","No file");
+        }
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
@@ -92,19 +98,19 @@ public class MainActivity extends Activity {
 
         Toast.makeText(getApplicationContext(), "Hi" + myPort, Toast.LENGTH_SHORT).show();
 
-        if (myPort == 11108) {
-            new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                    null);
-        } else {
-            ServerSocket serverSocket = null;
-            try {
-                serverSocket = new ServerSocket(SERVER_PORT);
-            } catch (IOException e) {
-                Log.v(TAG, "ServerSocket error", e);
-            }
-            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    serverSocket);
-        }
+//        if (myPort == 11108) {
+//            new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+//                    null);
+//        } else {
+//            ServerSocket serverSocket = null;
+//            try {
+//                serverSocket = new ServerSocket(SERVER_PORT);
+//            } catch (IOException e) {
+//                Log.v(TAG, "ServerSocket error", e);
+//            }
+//            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+//                    serverSocket);
+//        }
 
     }
 
@@ -224,5 +230,13 @@ public class MainActivity extends Activity {
 
             return null;
         }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.share){
+            Log.d(MainActivity.TAG, mDataset.get(Utility.position).getFile().getName());
+        }
+        return true;
     }
 }
