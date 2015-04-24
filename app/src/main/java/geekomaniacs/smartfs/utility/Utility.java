@@ -19,6 +19,9 @@ public class Utility {
     public static final String SELECT_ACTION = "Select an action";
     public static final String SHARE = "Share";
     public static final String DELETE = "Delete";
+    public static final String FILENAME = "fileName";
+    public static final String FILESIZE = "fileSize";
+    public static final String DATEMODIFIED = "dateModified";
     public static int position;
 
     public static ArrayList<SmartFSFile> getFileList() {

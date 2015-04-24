@@ -1,6 +1,7 @@
 package geekomaniacs.smartfs;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.beans.SmartFSFile;
@@ -65,7 +68,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         return mDataset.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener{
         // each data item is just a string in this case
         public TextView mTextView;
         public ViewHolder(TextView v) {
@@ -77,8 +80,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(MyAdapter.context,"Clicked", Toast.LENGTH_SHORT).show();
-            Log.d("Position", String.valueOf(getPosition()));
+            Intent intent = new Intent(context,FileOperationsActivity.class);
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            File file = mDataset.get(getPosition()).getFile();
+            intent.putExtra(Utility.FILENAME, file.getName());
+            intent.putExtra(Utility.FILESIZE, file.length());
+            intent.putExtra(Utility.DATEMODIFIED, sdf.format(file.lastModified()));
+            context.startActivity(intent);
         }
 
         @Override

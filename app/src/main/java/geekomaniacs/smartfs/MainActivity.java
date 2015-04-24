@@ -58,60 +58,57 @@ public class MainActivity extends Activity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-//        mRecyclerView.addOnItemTouchListener(
-//                new RecyclerView.OnItemTouchListener() {
-//                    @Override
-//                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-//                        Log.v(TAG, "onInterceptTouchEvent");
-//                        showPopUp(recyclerView);
-//                        onTouchEvent(recyclerView, motionEvent);
-//                        return true;
-//                    }
-//
-//                    @Override
-//                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-//                        Log.v(TAG, "onTouchEvent");
-//                        showPopUp(recyclerView);
-//
-//                    }
-//                }
-//        );
+/*        mRecyclerView.addOnItemTouchListener(
+                new RecyclerView.OnItemTouchListener() {
+                    @Override
+                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onInterceptTouchEvent");
+                        showPopUp(recyclerView);
+                        onTouchEvent(recyclerView, motionEvent);
+                        return true;
+                    }
+
+                    @Override
+                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onTouchEvent");
+                        showPopUp(recyclerView);
+
+                    }
+                }
+        );*/
 
         // specify an adapter (see also next example)
-//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-        mDataset = new ArrayList<SmartFSFile>();
-        try{
-            mDataset.add(new SmartFSFile(new File("ABC")));
-            mDataset.add(new SmartFSFile(new File("BCD")));
-        }catch(FileNotFoundException e){
-            Log.e("No file","No file");
-        }
+        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+//        mDataset = new ArrayList<SmartFSFile>();
+//        try{
+//            mDataset.add(new SmartFSFile(new File("ABC")));
+//            mDataset.add(new SmartFSFile(new File("BCD")));
+//        }catch(FileNotFoundException e){
+//            Log.e("No file","No file");
+//        }
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        TelephonyManager tel = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        /*TelephonyManager tel = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String portStr = tel.getLine1Number().substring(tel.getLine1Number().length() - 4);
         final String sMyPort = String.valueOf((Integer.parseInt(portStr) * 2));
         myPort = Integer.parseInt(sMyPort);
 
         Toast.makeText(getApplicationContext(), "Hi" + myPort, Toast.LENGTH_SHORT).show();
-
-//        if (myPort == 11108) {
-//            new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-//                    null);
-//        } else {
-//            ServerSocket serverSocket = null;
-//            try {
-//                serverSocket = new ServerSocket(SERVER_PORT);
-//            } catch (IOException e) {
-//                Log.v(TAG, "ServerSocket error", e);
-//            }
-//            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-//                    serverSocket);
-//        }
-
+        if (myPort == 11108) {
+        new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
+        } else {
+            ServerSocket serverSocket = null;
+            try {
+                serverSocket = new ServerSocket(SERVER_PORT);
+                } catch (IOException e) {
+                Log.v(TAG, "ServerSocket error", e);
+            }
+            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                serverSocket);
+        }*/
     }
 
 
