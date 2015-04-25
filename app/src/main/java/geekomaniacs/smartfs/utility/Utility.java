@@ -22,6 +22,7 @@ public class Utility {
     public static final String FILENAME = "fileName";
     public static final String FILESIZE = "fileSize";
     public static final String DATEMODIFIED = "dateModified";
+    public static final String COMMA = ",";
     public static int position;
 
     public static ArrayList<SmartFSFile> getFileList() {

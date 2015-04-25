@@ -1,20 +1,17 @@
 package geekomaniacs.smartfs;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,6 +26,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import geekomaniacs.smartfs.adapters.MyAdapter;
 import geekomaniacs.smartfs.beans.SmartFSFile;
 import geekomaniacs.smartfs.utility.Utility;
 
@@ -78,14 +76,14 @@ public class MainActivity extends Activity {
         );*/
 
         // specify an adapter (see also next example)
-        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-//        mDataset = new ArrayList<SmartFSFile>();
-//        try{
-//            mDataset.add(new SmartFSFile(new File("ABC")));
-//            mDataset.add(new SmartFSFile(new File("BCD")));
-//        }catch(FileNotFoundException e){
-//            Log.e("No file","No file");
-//        }
+//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+        mDataset = new ArrayList<SmartFSFile>();
+        try{
+            mDataset.add(new SmartFSFile(new File("ABC")));
+            mDataset.add(new SmartFSFile(new File("BCD")));
+        }catch(FileNotFoundException e){
+            Log.e("No file","No file");
+        }
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
