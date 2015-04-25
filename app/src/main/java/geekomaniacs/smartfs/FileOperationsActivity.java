@@ -42,17 +42,19 @@ public class FileOperationsActivity extends ActionBarActivity {
         setFieldValues(intent);
 
         DatabaseOperations dbo = new DatabaseOperations(this);
-        dbo.insertIntoTable(dbo, fileName, "2");
+//        dbo.insertIntoTable(dbo, fileName, "2");
+        dbo.insertIntoFilesTable(dbo, fileName, fileSize, dateModified);
         Cursor cr = dbo.getInformation(dbo, fileName);
-        cr.moveToFirst();
-        do{
-            Log.d("Column", cr.getString(0));
-        }while(cr.moveToNext());
-        cr.moveToFirst();
+        if(cr.getCount() != 0) {
+            cr.moveToFirst();
+            do {
+                Log.d("Column", cr.getString(0));
+            } while (cr.moveToNext());
+            cr.moveToFirst();
 
-        ListAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1,cr,new String[]{TableData.TableInformation.USER_EMAIL},new int[]{android.R.id.text1});
-        listView.setAdapter(adapter);
-
+            ListAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cr, new String[]{TableData.TableInformation.USER_EMAIL}, new int[]{android.R.id.text1});
+            listView.setAdapter(adapter);
+        }
     }
 
     /**
