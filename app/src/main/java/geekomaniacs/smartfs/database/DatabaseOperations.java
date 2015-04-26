@@ -31,7 +31,8 @@ public class DatabaseOperations extends SQLiteOpenHelper{
             ") ON DELETE CASCADE" + Utility.COMMA + "FOREIGN KEY(" +
             TableData.TableInformation.USER_EMAIL + ") REFERENCES " +
             TableData.TableInformation.USERS + "(" + TableData.TableInformation.USER_EMAIL +
-            ") ON DELETE CASCADE);";
+            ") ON DELETE CASCADE" + Utility.COMMA + "UNIQUE(" + TableData.TableInformation.FILE_NAME +
+            Utility.COMMA + TableData.TableInformation.USER_EMAIL + ") ON CONFLICT REPLACE);";
 
 
     public DatabaseOperations(Context context){
@@ -57,25 +58,39 @@ public class DatabaseOperations extends SQLiteOpenHelper{
      * Insert a row in the shared_files table
      * @param dbo
      * @param fileName
-     * @param userEmail
+     * @param userEmails
      */
-    public void insertIntoTable(DatabaseOperations dbo, String fileName, String userEmail){
+    public int insertIntoSharedUsersTable(DatabaseOperations dbo, String fileName, String[] userEmails){
         SQLiteDatabase sqlDB = dbo.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(TableData.TableInformation.FILE_NAME, fileName);
-        values.put(TableData.TableInformation.USER_EMAIL, userEmail);
-        long status = sqlDB.insert(TableData.TableInformation.SHARED_FILES, null, values);
-        Log.d("Insert", String.valueOf(status));
+        for(int i = 0; i < userEmails.length; i++) {
+            ContentValues values = new ContentValues();
+            values.put(TableData.TableInformation.FILE_NAME, fileName);
+            values.put(TableData.TableInformation.USER_EMAIL, userEmails[i]);
+            long status = sqlDB.insert(TableData.TableInformation.SHARED_FILES, null, values);
+            Log.d("Insert", "Successful: " + String.valueOf(status != -1));
+            if(status == -1)
+                return -1;
+        }
+        return 1;
     }
 
     public void insertIntoFilesTable(DatabaseOperations dbo, String fileName, String fileSize,
                                       String dateModified){
+
         SQLiteDatabase sqlDB = dbo.getWritableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TableData.TableInformation.FILES + " WHERE " +
+                TableData.TableInformation.FILE_NAME + "= '" + fileName + "';";
+        Cursor c = sqlDB.rawQuery(query, null);
+        if(c.moveToFirst()){
+            if(c.getInt(0) != 0)
+                return;
+        }
+
         ContentValues values = new ContentValues();
         values.put(TableData.TableInformation.FILE_NAME, fileName);
         values.put(TableData.TableInformation.FILE_SIZE, fileSize);
         values.put(TableData.TableInformation.FILE_DATE_MODIFIED, dateModified);
-        long status = sqlDB.insert(TableData.TableInformation.FILES, null, values);
+        sqlDB.insert(TableData.TableInformation.FILES, null, values);
     }
 
     /**
@@ -88,10 +103,21 @@ public class DatabaseOperations extends SQLiteOpenHelper{
         SQLiteDatabase sqlDB = dbo.getReadableDatabase();
         String[] columns = {TableData.TableInformation.ROWID, TableData.TableInformation.USER_EMAIL};
         Cursor cursor = sqlDB.query(TableData.TableInformation.SHARED_FILES, columns,
-                TableData.TableInformation.FILE_NAME + "= '"+ fileName +"'", null, null, null, null);
+                TableData.TableInformation.FILE_NAME + " = '" + fileName + "'", null, null, null, null);
         Log.d("Cursor", String.valueOf(cursor == null));
         return cursor;
     }
 
 
+    public int deleteFromSharedUsersTables(DatabaseOperations dbo, String fileName, String[] user_emails) {
+        SQLiteDatabase sqlDB = dbo.getWritableDatabase();
+        for(int i = 0; i < user_emails.length; i++) {
+            String where = TableData.TableInformation.FILE_NAME + " = '" + fileName + "' AND " +
+                    TableData.TableInformation.USER_EMAIL + " = '" + user_emails[i] + "'";
+            long status = sqlDB.delete(TableData.TableInformation.SHARED_FILES, where, null);
+            if(status == -1)
+                return -1;
+        }
+        return 1;
+    }
 }

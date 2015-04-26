@@ -76,14 +76,14 @@ public class MainActivity extends Activity {
         );*/
 
         // specify an adapter (see also next example)
-//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-        mDataset = new ArrayList<SmartFSFile>();
+        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+        /*mDataset = new ArrayList<SmartFSFile>();
         try{
             mDataset.add(new SmartFSFile(new File("ABC")));
             mDataset.add(new SmartFSFile(new File("BCD")));
         }catch(FileNotFoundException e){
             Log.e("No file","No file");
-        }
+        }*/
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);

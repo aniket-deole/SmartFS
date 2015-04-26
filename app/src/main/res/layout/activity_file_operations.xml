@@ -28,8 +28,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="metadata"
         android:id="@+id/metadata" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/user_email_id"
+        android:hint="Enter email id to share with" />
 
     <ListView
         android:layout_width="match_parent"
@@ -40,12 +45,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Share"
-        android:id="@+id/shareButton" />
+        android:id="@+id/shareButton"
+        android:layout_gravity="center_horizontal" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"
-        android:id="@+id/deleteButton" />
+        android:id="@+id/deleteButton"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>
