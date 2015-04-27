@@ -3,7 +3,7 @@ package geekomaniacs.smartfs;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.SystemClock;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,10 +18,9 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import geekomaniacs.smartfs.database.DatabaseOperations;
 import geekomaniacs.smartfs.database.TableData;
+import geekomaniacs.smartfs.mail.GmailSender;
 import geekomaniacs.smartfs.utility.Utility;
 
 
@@ -38,6 +37,7 @@ public class FileOperationsActivity extends ActionBarActivity {
     Button share;
     Button delete;
     Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,31 +57,38 @@ public class FileOperationsActivity extends ActionBarActivity {
         share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] user_emails = sharedToUsers.getText().toString().split(";");
-                if(dbo.insertIntoSharedUsersTable(dbo, fileName, user_emails) == 1)
-                    Toast.makeText(context, "Shared with users successfully", Toast.LENGTH_LONG).show();
-            }
+                String[] user_emails = sharedToUsers.getText().toString().split(",");
+                if(dbo.insertIntoSharedUsersTable(dbo, fileName, user_emails) == 1) {
+                    final GmailSender sender = new GmailSender(Utility.USERNAME, Utility.PASSWORD);
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override public Void doInBackground(Void... arg) {
+                            try {
+                                sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY + Utility.SHARED_FILE_LINK + fileName, Utility.USERNAME, sharedToUsers.getText().toString());
+                            } catch (Exception e) {
+                                Log.e("SendMail", e.getMessage(), e);
+                            }
+                            return null;
+                        }
+                    }.execute();
+
+                    }
+                   Toast.makeText(context, "Shared with users successfully", Toast.LENGTH_LONG).show();
+                }
+
         });
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] user_emails = sharedToUsers.getText().toString().split(";");
+                String[] user_emails = sharedToUsers.getText().toString().split(",");
                 if(dbo.deleteFromSharedUsersTables(dbo, fileName, user_emails) == 1)
                     Toast.makeText(context, "Unshared successfully", Toast.LENGTH_LONG).show();
             }
         });
 
         setFieldValues(intent);
-
-//        dbo.insertIntoTable(dbo, fileName, "2");
         dbo.insertIntoFilesTable(dbo, fileName, fileSize, dateModified);
         Cursor cr = dbo.getInformation(dbo, fileName);
         if(cr.getCount() != 0) {
-/*            cr.moveToFirst();
-            do {
-                Log.d("Column", cr.getString(0));
-            } while (cr.moveToNext());
-            cr.moveToFirst();*/
             ListAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cr, new String[]{TableData.TableInformation.USER_EMAIL}, new int[]{android.R.id.text1});
             listView.setAdapter(adapter);
         }
@@ -92,9 +99,9 @@ public class FileOperationsActivity extends ActionBarActivity {
      * @param intent
      */
     public void setFieldValues(Intent intent){
-        fileName = intent.getExtras().getString(Utility.FILENAME);
-        fileSize = String.valueOf(intent.getExtras().getLong(Utility.FILESIZE) / 1000);
-        dateModified = intent.getExtras().getString(Utility.DATEMODIFIED);
+        fileName = intent.getExtras().getString(Utility.FILE_NAME);
+        fileSize = String.valueOf(intent.getExtras().getLong(Utility.FILE_SIZE) / 1000);
+        dateModified = intent.getExtras().getString(Utility.DATE_MODIFIED);
         fileNameText.setText("File name: " + fileName);
         fileSizeText.setText("File size: " + fileSize + "kb");
         dateModifiedText.setText("Date modified: " + dateModified);

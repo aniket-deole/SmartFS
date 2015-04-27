@@ -19,10 +19,17 @@ public class Utility {
     public static final String SELECT_ACTION = "Select an action";
     public static final String SHARE = "Share";
     public static final String DELETE = "Delete";
-    public static final String FILENAME = "fileName";
-    public static final String FILESIZE = "fileSize";
-    public static final String DATEMODIFIED = "dateModified";
+    public static final String FILE_NAME = "fileName";
+    public static final String FILE_SIZE = "fileSize";
+    public static final String DATE_MODIFIED = "dateModified";
     public static final String COMMA = ",";
+    public static final String USERNAME = "smartfs2015@gmail.com";
+    public static final String PASSWORD = "geekomaniacs";
+    public static final String SUBJECT = "SmartFS: A new file has been shared with you:- ";
+    public static final String BODY = "Hello, a user has shared a file with you\n";
+    public static final String SHARED_FILE_LINK = "Please click the following link to add the file to SmartFS\nhttp://www.aniketdeole.in/file/";
+    public static final String FORWARD_SLASH = "/";
+
     public static int position;
 
     public static ArrayList<SmartFSFile> getFileList() {

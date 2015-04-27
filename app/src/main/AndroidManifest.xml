@@ -24,11 +24,26 @@
             android:name=".FileOperationsActivity"
             android:label="@string/title_activity_file_operations"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Base.Theme.AppCompat">
-
+            android:theme="@style/Base.Theme.AppCompat" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="geekomaniacs.smartfs.MainActivity" />
+        </activity>
+        <activity
+            android:name=".NewFileSharedActivity"
+            android:label="@string/title_activity_new_file_shared"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Base.Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="geekomaniacs.smartfs.MainActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"
+                    android:host="www.aniketdeole.in"/>
+            </intent-filter>
         </activity>
     </application>
 

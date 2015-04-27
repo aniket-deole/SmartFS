@@ -83,9 +83,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             Intent intent = new Intent(context,FileOperationsActivity.class);
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             File file = mDataset.get(getPosition()).getFile();
-            intent.putExtra(Utility.FILENAME, file.getName());
-            intent.putExtra(Utility.FILESIZE, file.length());
-            intent.putExtra(Utility.DATEMODIFIED, sdf.format(file.lastModified()));
+            intent.putExtra(Utility.FILE_NAME, file.getName());
+            intent.putExtra(Utility.FILE_SIZE, file.length());
+            intent.putExtra(Utility.DATE_MODIFIED, sdf.format(file.lastModified()));
             context.startActivity(intent);
         }
 

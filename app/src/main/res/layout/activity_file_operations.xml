@@ -7,21 +7,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="File Name"
+        android:text="@string/file_name"
         android:id="@+id/fileName" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="File Size"
+        android:text="@string/file_size"
         android:id="@+id/fileSize" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Date modified"
+        android:text="@string/date_modified"
         android:id="@+id/dateModified" />
 
     <TextView
@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/user_email_id"
-        android:hint="Enter email id to share with" />
+        android:hint="@string/hint_share_file" />
 
     <ListView
         android:layout_width="match_parent"
@@ -44,14 +44,14 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Share"
+        android:text="@string/share_button"
         android:id="@+id/shareButton"
         android:layout_gravity="center_horizontal" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete"
+        android:text="@string/delete_button"
         android:id="@+id/deleteButton"
         android:layout_gravity="center_horizontal" />
 
