@@ -1,6 +1,7 @@
 package geekomaniacs.smartfs;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,12 +41,14 @@ public class MainActivity extends Activity {
     private RecyclerView.LayoutManager mLayoutManager;
     private int myPort;
     ArrayList<SmartFSFile> mDataset;
+    public static String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Intent intent = getIntent();
+        username = intent.getExtras().getString("username");
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes

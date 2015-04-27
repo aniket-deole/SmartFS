@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import geekomaniacs.smartfs.database.DatabaseOperations;
 import geekomaniacs.smartfs.utility.Utility;
@@ -29,6 +32,8 @@ public class NewFileSharedActivity extends ActionBarActivity {
         sharedBy[0] = path[1];
         String fileName = path[2];
         dbo.insertIntoSharedUsersTable(dbo, fileName, sharedBy);
+        TextView sharedByText = (TextView) findViewById(R.id.shared_by);
+        sharedByText.setText("The user: " + sharedBy[0] + " has shared file: " + fileName + " with you.");
     }
 
 

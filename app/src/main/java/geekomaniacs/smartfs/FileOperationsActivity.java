@@ -63,7 +63,10 @@ public class FileOperationsActivity extends ActionBarActivity {
                     new AsyncTask<Void, Void, Void>() {
                         @Override public Void doInBackground(Void... arg) {
                             try {
-                                sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY + Utility.SHARED_FILE_LINK + fileName, Utility.USERNAME, sharedToUsers.getText().toString());
+                                sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY +
+                                        Utility.SHARED_FILE_LINK + MainActivity.username +
+                                        Utility.FORWARD_SLASH + fileName, Utility.USERNAME,
+                                        sharedToUsers.getText().toString());
                             } catch (Exception e) {
                                 Log.e("SendMail", e.getMessage(), e);
                             }
