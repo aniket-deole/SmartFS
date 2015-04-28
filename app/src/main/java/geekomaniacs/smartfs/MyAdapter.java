@@ -86,5 +86,4 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             Log.v(MainActivity.TAG, mTextView.getText().toString());
         }
     }
-
 }

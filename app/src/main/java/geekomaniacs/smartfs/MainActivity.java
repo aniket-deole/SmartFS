@@ -1,45 +1,55 @@
 package geekomaniacs.smartfs;
 
 import android.app.Activity;
-import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.TelephonyManager;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.beans.SmartFSFile;
+import geekomaniacs.smartfs.message.FileMetadataRequestUDPMessage;
+import geekomaniacs.smartfs.message.FileMetadataUDPMessage;
+import geekomaniacs.smartfs.message.FilePartUDPMessage;
+import geekomaniacs.smartfs.message.MessageResolver;
+import geekomaniacs.smartfs.message.PayloadExceededException;
+import geekomaniacs.smartfs.message.UDPMessage;
 import geekomaniacs.smartfs.utility.Utility;
 
 
 public class MainActivity extends Activity {
-
+    public static final String IP1 = "192.168.1.26";
+    public static final String IP2 = "192.168.1.10";
     public static final String TAG = "SmartFS";
-    private static final Integer SERVER_PORT = 10000;
+    private static final Integer SERVER_PORT = 10003;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private int myPort;
+    public static String PATH;
+    private Integer messageCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,54 +66,32 @@ public class MainActivity extends Activity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-//        mRecyclerView.addOnItemTouchListener(
-//                new RecyclerView.OnItemTouchListener() {
-//                    @Override
-//                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-//                        Log.v(TAG, "onInterceptTouchEvent");
-//                        showPopUp(recyclerView);
-//                        onTouchEvent(recyclerView, motionEvent);
-//                        return true;
-//                    }
-//
-//                    @Override
-//                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-//                        Log.v(TAG, "onTouchEvent");
-//                        showPopUp(recyclerView);
-//
-//                    }
-//                }
-//        );
 
         // specify an adapter (see also next example)
         ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-//        ArrayList<SmartFSFile> mDataset = new ArrayList<SmartFSFile>();
-//        mDataset.add(new SmartFSFile(new File("ABC")));
-//        mDataset.add(new SmartFSFile(new File("BCD")));
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        TelephonyManager tel = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String portStr = tel.getLine1Number().substring(tel.getLine1Number().length() - 4);
-        final String sMyPort = String.valueOf((Integer.parseInt(portStr) * 2));
-        myPort = Integer.parseInt(sMyPort);
+        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
-        Toast.makeText(getApplicationContext(), "Hi" + myPort, Toast.LENGTH_SHORT).show();
+        PATH = Environment.getExternalStorageDirectory().toString();
 
-        if (myPort == 11108) {
-            new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                    null);
-        } else {
-            ServerSocket serverSocket = null;
-            try {
-                serverSocket = new ServerSocket(SERVER_PORT);
-            } catch (IOException e) {
-                Log.v(TAG, "ServerSocket error", e);
+
+        Button button = (Button) findViewById(R.id.button2);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                        null);
             }
+        });
+
+        if (ip.equalsIgnoreCase(IP1)) {
             new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    serverSocket);
+                    1);
         }
 
     }
@@ -137,43 +125,67 @@ public class MainActivity extends Activity {
         popUp.show();
     }
 
-    public class ServerSocketListener extends AsyncTask<ServerSocket, Void, Void> {
+    public class ServerSocketListener extends AsyncTask<Integer, Void, Void> {
 
         @Override
-        protected Void doInBackground(ServerSocket... params) {
+        protected Void doInBackground(Integer... params) {
+            DatagramSocket socket;
+            try {
+                socket = new DatagramSocket(SERVER_PORT);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
             while (true) {
                 try {
                     Log.v(TAG, "SSLDB: Waiting for socket");
-                    Socket socket = params[0].accept();
-                    File file = new File(Environment.getExternalStorageDirectory().toString()
-                            + Utility.SMART_FS_DIRECTORY +
-                            File.separator + "testReceived");
-                    Log.v(TAG, "SSLDB: File Created");
-                    byte[] mybytearray = new byte[10485760];
-                    InputStream is = socket.getInputStream();
-                    FileOutputStream fos = new FileOutputStream(file);
-                    BufferedOutputStream bos = new BufferedOutputStream(fos);
-                    int bytesRead = is.read(mybytearray, 0, mybytearray.length);
-                    int current = bytesRead;
 
-                    do {
-                        bytesRead =
-                                is.read(mybytearray, current, (mybytearray.length - current));
-                        if (bytesRead >= 0) current += bytesRead;
-                        Log.v(TAG, "SSLDB: " + bytesRead + " bytes written");
-                    } while (bytesRead > 0);
+                    byte[] buf = new byte[UDPMessage.MAX_BLOCK_SIZE];
 
-                    bos.write(mybytearray, 0, current);
-                    bos.flush();
-                    Log.v(TAG, "SSLDB: File Write Done");
 
-                    socket.close();
-                    bos.close();
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    socket.receive(packet);
+
+                    buf = packet.getData();
+
+                    UDPMessage receivedMessage = MessageResolver.createMessage(buf);
+                    receivedMessage.setDestination(packet.getAddress());
+                    receivedMessage.setPort(packet.getPort());
+                    try {
+                        receivedMessage.handle();
+                    } catch (PayloadExceededException e) {
+                        Log.v(TAG, "SSLDIB:", e);
+                    }
+
+//                    String hurray = " Hurray!";
+//
+//                    packet = new DatagramPacket(hurray.getBytes(), hurray.getBytes().length,
+//                            packet.getAddress(), packet.getPort());
+//
+//                    socket.send(packet);
+//
+//                    Log.v (TAG, "SSLDB:" + new String (buf));
+//
+//                    File file = new File(PATH
+//                            + Utility.SMART_FS_DIRECTORY +
+//                            File.separator + "testReceived");
+//
+//                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+//                    bos.write(buf);
+//                    bos.flush();
+//                    bos.close();
+//
+//                    Log.v(TAG, "SSLDB: File Created:" + file.getAbsolutePath());
 
                 } catch (IOException e) {
                     Log.e(TAG, "SSLDB:", e);
+                    break;
                 }
             }
+            if (socket != null)
+                socket.close();
+
+            return null;
         }
     }
 
@@ -181,48 +193,102 @@ public class MainActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                Log.v(TAG, "FTDIB: ", e);
-            }
-
-            File file = new File(Environment.getExternalStorageDirectory().toString()
-                    + Utility.SMART_FS_DIRECTORY +
-                    File.separator + "test");
-            if (!file.exists()) {
-                Log.v(TAG, "The file cannot be found.");
-                return null;
-            } else {
-                Log.v(TAG, "The test file exists. Beginning to transfer file.");
-            }
 
             try {
-                Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}),
-                        11112);
+                UDPMessage requestFileDetails = new FileMetadataRequestUDPMessage(SERVER_PORT,
+                        InetAddress.getByName(IP1),
+                        "scarlett-johansson-5054-1920x1200.jpg"
+                );
 
-                byte[] mybytearray = new byte[(int) file.length()];
-                BufferedInputStream bis = new BufferedInputStream(
-                        new FileInputStream(file));
-                int result = bis.read(mybytearray, 0, mybytearray.length);
-                Log.v(TAG, "FTDIB: Number of bytes read/shoudldRead:" + result + ":" +
-                        file.length());
+                FileMetadataUDPMessage fileDetails = (FileMetadataUDPMessage) requestFileDetails.sendAndWait();
+                Log.v (TAG, "File received:" + fileDetails.fileName + " of size " + fileDetails.size);
 
-                socket.getOutputStream().write(mybytearray,
-                        0, mybytearray.length);
-                socket.getOutputStream().flush();
-                Log.v(TAG, "FTDIB: File Writing Done.");
-                socket.close();
 
-                bis.close();
+                long totalParts = (fileDetails.size / SmartFSFile.BLOCK_SIZE)  + 1;
 
-                return null;
+                for (int i = 0; i < totalParts; i++) {
+                    UDPMessage requestFilePart = new FilePartRequestUDPMessage (SERVER_PORT,
+                            InetAddress.getByName(IP1), fileDetails.fileName, i);
 
+                    FilePartUDPMessage filePart = (FilePartUDPMessage) requestFilePart.sendAndWait();
+                    filePart.setFileName (fileDetails.fileName);
+                    try {
+                        filePart.handle();
+                        Log.v (TAG, "Handled part:" + i);
+                    } catch (PayloadExceededException e) {
+                        Log.e (TAG, "FTDIB:", e);
+                    }
+                }
+
+
+
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
             } catch (IOException e) {
-                Log.e(TAG, "FTDIB:", e);
+                e.printStackTrace();
             }
 
+
+//
+//            File file = new File(PATH
+//                    + Utility.SMART_FS_DIRECTORY +
+//                    File.separator + "test");
+//            try {
+//                Log.v(TAG, "File created at:" + file.getAbsolutePath() + ":" + file.getCanonicalPath());
+//            } catch (IOException e) {
+//                Log.e(TAG, "FTDIB:", e);
+//            }
+//            if (!file.exists()) {
+//                Log.v(TAG, "The file cannot be found.");
+//                return null;
+//            } else {
+//                Log.v(TAG, "The test file exists. Beginning to transfer file.");
+//            }
+//
+//            try {
+//
+//                SmartFSFile sfsFile = new SmartFSFile(file);
+//
+//                byte[] mybytearray = sfsFile.getDataBlock(3);
+//
+//                UDPMessage message = new FilePartUDPMessage(SERVER_PORT, InetAddress.getByName(IP1));
+//
+//                message.setPayload(mybytearray);
+//
+//                message.sendAndWait();
+//
+//
+//            } catch (FileNotFoundException e) {
+//                Log.e(TAG, "FTDIB:", e);
+//            } catch (PayloadExceededException e) {
+//                Log.e(TAG, "FTDIB:", e);
+//            } catch (UnknownHostException e) {
+//                Log.e(TAG, "FTDIB:", e);
+//            } catch (IOException e) {
+//                Log.e(TAG, "FTDIB:", e);
+//            }
+//
             return null;
         }
     }
+
+    public static String genHashWrapper(String input) {
+        String hashed = "";
+        try {
+            hashed = genHash(input);
+        } catch (NoSuchAlgorithmException e) {
+        }
+        return hashed;
+    }
+
+    private static String genHash(String input) throws NoSuchAlgorithmException {
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        byte[] sha1Hash = sha1.digest(input.getBytes());
+        java.util.Formatter formatter = new java.util.Formatter();
+        for (byte b : sha1Hash) {
+            formatter.format("%02x", b);
+        }
+        return formatter.toString();
+    }
+
 }
