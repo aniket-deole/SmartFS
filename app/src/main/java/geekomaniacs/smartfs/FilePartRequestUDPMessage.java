@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.RandomAccess;
 
@@ -53,18 +54,30 @@ public class FilePartRequestUDPMessage extends UDPMessage {
 
         RandomAccessFile raf = new RandomAccessFile(file,"r");
         raf.seek(partNumber * SmartFSFile.BLOCK_SIZE);
-        byte[] buf;
-        if ((partNumber * SmartFSFile.BLOCK_SIZE) > file.length()) {
-            buf = new byte[(int)file.length() % SmartFSFile.BLOCK_SIZE];
+        byte[] buf; int len;
+        if ((partNumber * SmartFSFile.BLOCK_SIZE + SmartFSFile.BLOCK_SIZE) > file.length()) {
+            len = (int)file.length() % SmartFSFile.BLOCK_SIZE;
+            buf = new byte[len];
         } else {
             buf = new byte[SmartFSFile.BLOCK_SIZE];
-
+            len = SmartFSFile.BLOCK_SIZE;
         }
         raf.read(buf);
+        Log.v(MainActivity.TAG, "Data Sending:" + partNumber+ ":" +
+                MainActivity.genHashWrapper(new String (buf, "UTF-8")));
         UDPMessage message = new FilePartUDPMessage(destinationPort,
                 destinationAddress, partNumber, buf);
 
-        message.setPayload(message.toString().getBytes());
+
+        byte[] pBuf;
+        pBuf = Arrays.copyOf(message.toString().getBytes(), len + 200);
+
+
+        for (int i = 200; i < len + 200; i++) {
+            pBuf[i] = buf[i-200];
+        }
+
+        message.setPayload(pBuf);
 
         message.send();
 
@@ -86,12 +99,11 @@ public class FilePartRequestUDPMessage extends UDPMessage {
                 destinationPort);
         socket.send(packet);
 
-        byte[] buf = new byte[UDPMessage.MAX_BLOCK_SIZE];
+        byte[] buf = new byte[4096+200];
         packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
 
-        Log.v(MainActivity.TAG, "Data Received:" + partNumber+ ":" +
-                MainActivity.genHashWrapper(new String (buf, "UTF-8")));
+
 
         socket.close();
 

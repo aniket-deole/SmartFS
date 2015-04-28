@@ -21,7 +21,7 @@ public class SmartFSFile {
         // If synchronous required, check file modes from here:
         // http://docs.oracle.com/javase/7/docs/api/java/io/
         // RandomAccessFile.html#RandomAccessFile(java.io.File,%20java.lang.String)
-        this.rafFile = new RandomAccessFile(file, "rw");
+//        this.rafFile = new RandomAccessFile(file, "rw");
         this.file = file;
         //initialize metadata
     }

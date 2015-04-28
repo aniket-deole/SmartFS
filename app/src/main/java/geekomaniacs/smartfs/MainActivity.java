@@ -2,6 +2,7 @@ package geekomaniacs.smartfs;
 
 import android.app.Activity;
 import android.net.wifi.WifiManager;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,10 +16,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+import geekomaniacs.smartfs.adapters.MyAdapter;
 import geekomaniacs.smartfs.beans.SmartFSFile;
 import geekomaniacs.smartfs.message.FileMetadataRequestUDPMessage;
 import geekomaniacs.smartfs.message.FileMetadataUDPMessage;
@@ -50,12 +52,16 @@ public class MainActivity extends Activity {
     private RecyclerView.LayoutManager mLayoutManager;
     public static String PATH;
     private Integer messageCounter = 0;
+    private int myPort;
+    ArrayList<SmartFSFile> mDataset;
+    public static String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Intent intent = getIntent();
+//        username = intent.getExtras().getString("username");
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -66,9 +72,34 @@ public class MainActivity extends Activity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+/*        mRecyclerView.addOnItemTouchListener(
+                new RecyclerView.OnItemTouchListener() {
+                    @Override
+                    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onInterceptTouchEvent");
+                        showPopUp(recyclerView);
+                        onTouchEvent(recyclerView, motionEvent);
+                        return true;
+                    }
+
+                    @Override
+                    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                        Log.v(TAG, "onTouchEvent");
+                        showPopUp(recyclerView);
+
+                    }
+                }
+        );*/
 
         // specify an adapter (see also next example)
-        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
+        mDataset = new ArrayList<SmartFSFile>();
+        try{
+            mDataset.add(new SmartFSFile(new File("ABC")));
+            mDataset.add(new SmartFSFile(new File("BCD")));
+        }catch(FileNotFoundException e){
+            Log.e("No file","No file");
+        }
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
@@ -212,6 +243,7 @@ public class MainActivity extends Activity {
 
                     FilePartUDPMessage filePart = (FilePartUDPMessage) requestFilePart.sendAndWait();
                     filePart.setFileName (fileDetails.fileName);
+                    filePart.setFileSize (fileDetails.size);
                     try {
                         filePart.handle();
                         Log.v (TAG, "Handled part:" + i);
@@ -291,4 +323,11 @@ public class MainActivity extends Activity {
         return formatter.toString();
     }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.share){
+            Log.d(MainActivity.TAG, mDataset.get(Utility.position).getFile().getName());
+        }
+        return true;
+    }
 }

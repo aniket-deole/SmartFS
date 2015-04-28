@@ -14,11 +14,11 @@ import geekomaniacs.smartfs.MainActivity;
 public class MessageResolver {
     public static UDPMessage createMessage(byte[] buf) {
         String string = null;
-        try {
-            string = new String (buf, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.v(MainActivity.TAG, "UDPCM:", e);
-        }
+//        try {
+            string = new String (buf);
+//        } catch (UnsupportedEncodingException e) {
+//            Log.v(MainActivity.TAG, "UDPCM:", e);
+//        }
         int i = 0;
         TYPE type = null;
 
@@ -26,14 +26,14 @@ public class MessageResolver {
             if (i == 0) {
                 type = TYPE.valueOf(TYPE.class, s);
             } else {
-                return parse(type, string);
+                return parse(type, string, buf);
             }
             i++;
         }
         return null;
     }
 
-    private static UDPMessage parse (TYPE type, String string) {
+    private static UDPMessage parse (TYPE type, String string, byte[] buf) {
         if (type == TYPE.GET_FILE_DETAILS)
             return FileMetadataRequestUDPMessage.parse(string);
         else if (type == TYPE.FILE_DETAILS)
@@ -41,7 +41,7 @@ public class MessageResolver {
         else if (type == TYPE.GET_FILE_PART)
             return FilePartRequestUDPMessage.parse (string);
         else if (type == TYPE.FILE_PART)
-            return FilePartUDPMessage.parse (string);
+            return FilePartUDPMessage.parse (string, buf);
             return null;
     }
 }
