@@ -38,6 +38,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import geekomaniacs.smartfs.adapters.MyAdapter;
+import geekomaniacs.smartfs.background.MessageTransferServer;
 import geekomaniacs.smartfs.beans.SmartFSFile;
 import geekomaniacs.smartfs.message.FileMetadataRequestUDPMessage;
 import geekomaniacs.smartfs.message.FileMetadataUDPMessage;
@@ -61,9 +62,6 @@ public class MainActivity extends Activity {
     private int myPort;
     ArrayList<SmartFSFile> mDataset;
     public static String username;
-    private volatile boolean detailsReceived;
-    String foreignIp;
-    String foreignPort;
 
     String myIp;
 
@@ -124,19 +122,20 @@ public class MainActivity extends Activity {
 
         new RegisterTask ().executeOnExecutor (AsyncTask.SERIAL_EXECUTOR, null);
 
-
+        Intent i = new Intent(getApplicationContext(), MessageTransferServer.class);
+        i.putExtra("process", "listen");
+        getApplicationContext().startService(i);
 
         Button button = (Button) findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                        null);
+                Intent i = new Intent(getApplicationContext(), MessageTransferServer.class);
+                i.putExtra("username", username);
+                getApplicationContext().startService(i);
+
             }
         });
-
-            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    1);
 
     }
 
@@ -169,164 +168,6 @@ public class MainActivity extends Activity {
         popUp.show();
     }
 
-    public class ServerSocketListener extends AsyncTask<Integer, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Integer... params) {
-            DatagramSocket socket;
-            try {
-                socket = new DatagramSocket(SERVER_PORT);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-            while (true) {
-                try {
-                    Log.v(TAG, "SSLDB: Waiting for socket");
-
-                    byte[] buf = new byte[UDPMessage.MAX_BLOCK_SIZE];
-
-
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                    socket.receive(packet);
-
-                    buf = packet.getData();
-
-                    UDPMessage receivedMessage = MessageResolver.createMessage(buf);
-                    receivedMessage.setDestination(packet.getAddress());
-                    receivedMessage.setPort(packet.getPort());
-                    try {
-                        receivedMessage.handle();
-                    } catch (PayloadExceededException e) {
-                        Log.v(TAG, "SSLDIB:", e);
-                    }
-
-//                    String hurray = " Hurray!";
-//
-//                    packet = new DatagramPacket(hurray.getBytes(), hurray.getBytes().length,
-//                            packet.getAddress(), packet.getPort());
-//
-//                    socket.send(packet);
-//
-//                    Log.v (TAG, "SSLDB:" + new String (buf));
-//
-//                    File file = new File(PATH
-//                            + Utility.SMART_FS_DIRECTORY +
-//                            File.separator + "testReceived");
-//
-//                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-//                    bos.write(buf);
-//                    bos.flush();
-//                    bos.close();
-//
-//                    Log.v(TAG, "SSLDB: File Created:" + file.getAbsolutePath());
-
-                } catch (IOException e) {
-                    Log.e(TAG, "SSLDB:", e);
-                    break;
-                }
-            }
-            if (socket != null)
-                socket.close();
-
-            return null;
-        }
-    }
-
-    public class FileTransfer extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            try {
-
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                detailsReceived = false;
-                new GetIpAndPortTask ().executeOnExecutor (AsyncTask.THREAD_POOL_EXECUTOR, null);
-                while (!detailsReceived) {};
-
-                UDPMessage requestFileDetails = new FileMetadataRequestUDPMessage(Integer.parseInt(foreignPort),
-                        InetAddress.getByName(foreignIp),
-                        "scarlett-johansson-5054-1920x1200.jpg"
-                );
-
-                FileMetadataUDPMessage fileDetails = (FileMetadataUDPMessage) requestFileDetails.sendAndWait();
-                Log.v (TAG, "File received:" + fileDetails.fileName + " of size " + fileDetails.size);
-
-
-                long totalParts = (fileDetails.size / SmartFSFile.BLOCK_SIZE)  + 1;
-
-                for (int i = 0; i < totalParts; i++) {
-                    UDPMessage requestFilePart = new FilePartRequestUDPMessage (SERVER_PORT,
-                            InetAddress.getByName(IP1), fileDetails.fileName, i);
-
-                    FilePartUDPMessage filePart = (FilePartUDPMessage) requestFilePart.sendAndWait();
-                    filePart.setFileName (fileDetails.fileName);
-                    filePart.setFileSize (fileDetails.size);
-                    try {
-                        filePart.handle();
-                        Log.v (TAG, "Handled part:" + i);
-                    } catch (PayloadExceededException e) {
-                        Log.e (TAG, "FTDIB:", e);
-                    }
-                }
-
-
-
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-//
-//            File file = new File(PATH
-//                    + Utility.SMART_FS_DIRECTORY +
-//                    File.separator + "test");
-//            try {
-//                Log.v(TAG, "File created at:" + file.getAbsolutePath() + ":" + file.getCanonicalPath());
-//            } catch (IOException e) {
-//                Log.e(TAG, "FTDIB:", e);
-//            }
-//            if (!file.exists()) {
-//                Log.v(TAG, "The file cannot be found.");
-//                return null;
-//            } else {
-//                Log.v(TAG, "The test file exists. Beginning to transfer file.");
-//            }
-//
-//            try {
-//
-//                SmartFSFile sfsFile = new SmartFSFile(file);
-//
-//                byte[] mybytearray = sfsFile.getDataBlock(3);
-//
-//                UDPMessage message = new FilePartUDPMessage(SERVER_PORT, InetAddress.getByName(IP1));
-//
-//                message.setPayload(mybytearray);
-//
-//                message.sendAndWait();
-//
-//
-//            } catch (FileNotFoundException e) {
-//                Log.e(TAG, "FTDIB:", e);
-//            } catch (PayloadExceededException e) {
-//                Log.e(TAG, "FTDIB:", e);
-//            } catch (UnknownHostException e) {
-//                Log.e(TAG, "FTDIB:", e);
-//            } catch (IOException e) {
-//                Log.e(TAG, "FTDIB:", e);
-//            }
-//
-            return null;
-        }
-    }
 
     public static String genHashWrapper(String input) {
         String hashed = "";
@@ -377,35 +218,4 @@ public class MainActivity extends Activity {
         }
     }
 
-
-    private class GetIpAndPortTask extends AsyncTask <Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                ArrayList<NameValuePair> postParameters = new  ArrayList<>();
-                String fEmail;
-                if (username.equalsIgnoreCase("aniket.deole@gmail.com")) {
-                    fEmail = "shwetajo@buffalo.edu";
-                }else {
-                    fEmail = "aniket.deole@gmail.com";
-                }
-                postParameters.add(new BasicNameValuePair("email", fEmail));
-                String response = CustomHttpClient.executeHttpPost("http://aniketdeole.in/sfs_getipport.php",
-                        postParameters);
-
-                Log.v (TAG, "PORTIP recieved:" + response);
-
-                String strings[] = response.split(":");
-                foreignIp = strings[0].trim ();
-                foreignPort = strings[1].trim ();
-
-                detailsReceived = true;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }
 }
