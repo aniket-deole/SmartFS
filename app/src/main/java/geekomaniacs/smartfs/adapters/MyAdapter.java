@@ -95,6 +95,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             menu.setHeaderTitle(Utility.SELECT_ACTION);
             menu.add(0, R.id.share, 0, Utility.SHARE);
             menu.add(0, R.id.delete, 0, Utility.DELETE);
+            menu.add(0, R.id.download, 0, Utility.DOWNLOAD);
             Log.v(MainActivity.TAG, String.valueOf(getPosition()));
             Utility.position = getPosition();
         }
