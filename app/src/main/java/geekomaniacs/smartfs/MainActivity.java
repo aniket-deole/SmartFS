@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.PopupMenu;
 
+import org.apache.http.NameValuePair;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +32,10 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import geekomaniacs.smartfs.adapters.MyAdapter;
 import geekomaniacs.smartfs.beans.SmartFSFile;
@@ -43,7 +49,7 @@ import geekomaniacs.smartfs.utility.Utility;
 
 
 public class MainActivity extends Activity {
-    public static final String IP1 = "192.168.1.26";
+    public static final String IP1 = "192.168.1.18";
     public static final String IP2 = "192.168.1.10";
     public static final String TAG = "SmartFS";
     private static final Integer SERVER_PORT = 10003;
@@ -55,6 +61,11 @@ public class MainActivity extends Activity {
     private int myPort;
     ArrayList<SmartFSFile> mDataset;
     public static String username;
+    private volatile boolean detailsReceived;
+    String foreignIp;
+    String foreignPort;
+
+    String myIp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +117,13 @@ public class MainActivity extends Activity {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        myIp = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
         PATH = Environment.getExternalStorageDirectory().toString();
+
+
+        new RegisterTask ().executeOnExecutor (AsyncTask.SERIAL_EXECUTOR, null);
+
 
 
         Button button = (Button) findViewById(R.id.button2);
@@ -120,10 +135,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (ip.equalsIgnoreCase(IP1)) {
             new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                     1);
-        }
 
     }
 
@@ -226,8 +239,19 @@ public class MainActivity extends Activity {
         protected Void doInBackground(Void... params) {
 
             try {
-                UDPMessage requestFileDetails = new FileMetadataRequestUDPMessage(SERVER_PORT,
-                        InetAddress.getByName(IP1),
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                detailsReceived = false;
+                new GetIpAndPortTask ().executeOnExecutor (AsyncTask.THREAD_POOL_EXECUTOR, null);
+                while (!detailsReceived) {};
+
+                UDPMessage requestFileDetails = new FileMetadataRequestUDPMessage(Integer.parseInt(foreignPort),
+                        InetAddress.getByName(foreignIp),
                         "scarlett-johansson-5054-1920x1200.jpg"
                 );
 
@@ -329,5 +353,59 @@ public class MainActivity extends Activity {
             Log.d(MainActivity.TAG, mDataset.get(Utility.position).getFile().getName());
         }
         return true;
+    }
+
+    private class RegisterTask extends AsyncTask <Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                ArrayList<NameValuePair> postParameters = new  ArrayList<>();
+                postParameters.add(new BasicNameValuePair("email", username));
+                postParameters.add(new BasicNameValuePair("ip", myIp));
+                postParameters.add(new BasicNameValuePair("port", SERVER_PORT.toString()));
+                String response = CustomHttpClient.executeHttpPost("http://aniketdeole.in/sfs_register.php",
+                        postParameters);
+
+                Log.v (TAG, "Registered:" + response);
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
+
+    private class GetIpAndPortTask extends AsyncTask <Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                ArrayList<NameValuePair> postParameters = new  ArrayList<>();
+                String fEmail;
+                if (username.equalsIgnoreCase("aniket.deole@gmail.com")) {
+                    fEmail = "shwetajo@buffalo.edu";
+                }else {
+                    fEmail = "aniket.deole@gmail.com";
+                }
+                postParameters.add(new BasicNameValuePair("email", fEmail));
+                String response = CustomHttpClient.executeHttpPost("http://aniketdeole.in/sfs_getipport.php",
+                        postParameters);
+
+                Log.v (TAG, "PORTIP recieved:" + response);
+
+                String strings[] = response.split(":");
+                foreignIp = strings[0].trim ();
+                foreignPort = strings[1].trim ();
+
+                detailsReceived = true;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 }
