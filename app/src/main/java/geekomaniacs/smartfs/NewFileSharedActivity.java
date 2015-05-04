@@ -40,11 +40,14 @@ public class NewFileSharedActivity extends ActionBarActivity {
         String[] sharedBy = new String[1];
         sharedBy[0] = path[1];
         String fileName = path[2];
+        String fileSize = path[3];
+        String dateModified = path[4];
         dbo.insertIntoSharedUsersTable(dbo, fileName, sharedBy);
         TextView sharedByText = (TextView) findViewById(R.id.shared_by);
         sharedByText.setText("The user: " + sharedBy[0] + " has shared file: " + fileName + " with you.");
         File file = new File(Environment.getExternalStorageDirectory().toString() +
                 Utility.SMART_FS_DIRECTORY + Utility.FORWARD_SLASH + fileName);
+        Utility.dbo.insertIntoFilesTable(Utility.dbo, fileName, fileSize, dateModified);
         try {
             if(file.createNewFile()){
                 Log.d("Created", "file");

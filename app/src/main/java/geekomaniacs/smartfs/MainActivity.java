@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Utility.createDatabaseObject(this);
         Intent intent = getIntent();
         username = intent.getExtras().getString("username");
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);

@@ -56,7 +56,7 @@ public class FileOperationsActivity extends ActionBarActivity {
         delete = (Button) findViewById(R.id.deleteButton);
         open = (Button) findViewById(R.id.openButton);
 
-        final DatabaseOperations dbo = new DatabaseOperations(this);
+        final DatabaseOperations dbo = Utility.dbo;
 
         share.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,7 +69,8 @@ public class FileOperationsActivity extends ActionBarActivity {
                             try {
                                 sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY +
                                         Utility.SHARED_FILE_LINK + MainActivity.username +
-                                        Utility.FORWARD_SLASH + fileName, Utility.USERNAME,
+                                        Utility.FORWARD_SLASH + fileName + Utility.FORWARD_SLASH +
+                                        fileSize + Utility.FORWARD_SLASH + dateModified, Utility.USERNAME,
                                         sharedToUsers.getText().toString());
                             } catch (Exception e) {
                                 Log.e("SendMail", e.getMessage(), e);
@@ -117,7 +118,7 @@ public class FileOperationsActivity extends ActionBarActivity {
      */
     public void setFieldValues(Intent intent){
         fileName = intent.getExtras().getString(Utility.FILE_NAME);
-        fileSize = String.valueOf(intent.getExtras().getLong(Utility.FILE_SIZE) / 1000);
+        fileSize = String.valueOf(intent.getExtras().getLong(Utility.FILE_SIZE));
         dateModified = intent.getExtras().getString(Utility.DATE_MODIFIED);
         fileNameText.setText("File name: " + fileName);
         fileSizeText.setText("File size: " + fileSize + "kb");

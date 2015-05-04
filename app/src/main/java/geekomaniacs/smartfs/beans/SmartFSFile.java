@@ -14,6 +14,7 @@ public class SmartFSFile {
     private File file;
     private RandomAccessFile rafFile;
     private String metadata;
+    private long downloadSize;
     public static final Integer BLOCK_SIZE = 4096;
     private static final String TAG = "SmartFS";
 
@@ -53,5 +54,13 @@ public class SmartFSFile {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public long getDownloadSize() {
+        return downloadSize;
+    }
+
+    public void setDownloadSize(long downloadSize) {
+        this.downloadSize = downloadSize;
     }
 }

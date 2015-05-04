@@ -8,7 +8,10 @@ import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -46,10 +49,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                    int viewType) {
         // create a new view
-        TextView v = (TextView) LayoutInflater.from(parent.getContext())
+        LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_view_entry, parent, false);
 
-        ViewHolder vh = new ViewHolder(v);
+        ViewHolder vh = new ViewHolder(layout);
         return vh;
     }
 
@@ -59,6 +62,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.mTextView.setText(mDataset.get(position).getFile().getName());
+        holder.mSmallTextView.setText((String.valueOf(mDataset.get(position).getDownloadSize())) + Utility.SPACE + Utility.PERCENT_COMPLETED);
 
     }
 
@@ -71,9 +75,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnCreateContextMenuListener{
         // each data item is just a string in this case
         public TextView mTextView;
-        public ViewHolder(TextView v) {
+        public TextView mSmallTextView;
+        public ViewHolder(LinearLayout v) {
             super(v);
-            mTextView = v;
+            mTextView = (TextView)v.findViewById(R.id.mainFileName);
+            mSmallTextView = (TextView)v.findViewById(R.id.fileSize);
             v.setOnClickListener(this);
             v.setOnCreateContextMenuListener(this);
         }
@@ -81,11 +87,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(context,FileOperationsActivity.class);
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             File file = mDataset.get(getPosition()).getFile();
             intent.putExtra(Utility.FILE_NAME, file.getName());
             intent.putExtra(Utility.FILE_SIZE, file.length());
-            intent.putExtra(Utility.DATE_MODIFIED, sdf.format(file.lastModified()));
+            intent.putExtra(Utility.DATE_MODIFIED, Utility.sdf.format(file.lastModified()));
             context.startActivity(intent);
         }
 
@@ -99,6 +104,5 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             Log.v(MainActivity.TAG, String.valueOf(getPosition()));
             Utility.position = getPosition();
         }
-
     }
 }

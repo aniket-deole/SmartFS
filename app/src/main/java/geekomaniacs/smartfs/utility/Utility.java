@@ -1,14 +1,20 @@
 package geekomaniacs.smartfs.utility;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.MainActivity;
 import geekomaniacs.smartfs.beans.SmartFSFile;
+import geekomaniacs.smartfs.database.DatabaseOperations;
+import geekomaniacs.smartfs.database.TableData;
 
 /**
  * Created by imbapumba on 4/20/15.
@@ -30,8 +36,13 @@ public class Utility {
     public static final String SHARED_FILE_LINK = "Please click the following link to add the file to SmartFS\nhttp://www.aniketdeole.in/";
     public static final String FORWARD_SLASH = "/";
     public static final String DOWNLOAD = "Download";
+    public static final String SPACE = " ";
+    public static final String PERCENT_COMPLETED = "% Completed";
     public static String path;
     public static int position;
+    public static DatabaseOperations dbo;
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
 
     public static ArrayList<SmartFSFile> getFileList() {
         ArrayList<SmartFSFile> smartFSFiles = new ArrayList<SmartFSFile>();
@@ -50,11 +61,41 @@ public class Utility {
         for (int i = 0; i < files.length; i++) {
             Log.d(MainActivity.TAG, "FileName: " + files[i].getName());
             try {
-                smartFSFiles.add(new SmartFSFile(files[i]));
+                SmartFSFile newFile = new SmartFSFile(files[i]);
+                long actualSize = getActualFileSize(files[i].getName());
+                long currentSize = newFile.getFile().length();
+                if(actualSize == -1){
+                    dbo.insertIntoFilesTable(dbo, files[i].getName(), String.valueOf(currentSize),
+                            sdf.format(files[i].lastModified()));
+                    newFile.setDownloadSize(100);
+                }else if(actualSize == 0){
+                    newFile.setDownloadSize(0);
+                }else{
+                    newFile.setDownloadSize((currentSize/actualSize) * 100);
+                }
+                smartFSFiles.add(newFile);
             } catch (FileNotFoundException e) {
                 Log.e(MainActivity.TAG, "UTGFL:", e);
             }
         }
         return smartFSFiles;
+    }
+
+    public static void createDatabaseObject(Context context){
+        dbo = new DatabaseOperations(context);
+    }
+
+    public static int getActualFileSize(String fileName){
+        SQLiteDatabase sqlDB = dbo.getReadableDatabase();
+        String[] columns = {TableData.TableInformation.ROWID, TableData.TableInformation.FILE_SIZE};
+        Cursor cursor = sqlDB.query(TableData.TableInformation.FILES, columns,
+                TableData.TableInformation.FILE_NAME + " = '" + fileName + "'", null, null, null, null);
+        Log.d("Cursor", String.valueOf(cursor == null));
+        if(cursor.moveToFirst() || cursor.getCount() >= 1){
+            Log.d("Size", String.valueOf(cursor.getInt(1)));
+            return cursor.getInt(1);
+        }else{
+            return -1;
+        }
     }
 }
