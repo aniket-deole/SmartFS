@@ -198,7 +198,7 @@ public class MessageTransferServer extends Service {
                 detailsReceived = true;
 
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
 
             return null;
