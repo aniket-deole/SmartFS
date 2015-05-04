@@ -62,8 +62,14 @@ public class Utility {
             Log.d(MainActivity.TAG, "FileName: " + files[i].getName());
             try {
                 SmartFSFile newFile = new SmartFSFile(files[i]);
-                long actualSize = getActualFileSize(files[i].getName());
-                long currentSize = newFile.getFile().length();
+                double actualSize = getActualFileSize(files[i].getName());
+                double currentSize = newFile.getFile().length();
+                Log.d("Actual Size", String.valueOf(actualSize));
+                Log.d("Current Size", String.valueOf(currentSize));
+                String owner = getOwner(files[i].getName());
+                if(owner != null){
+                    newFile.setOwner(owner);
+                }
                 if(actualSize == -1){
                     dbo.insertIntoFilesTable(dbo, files[i].getName(), String.valueOf(currentSize),
                             sdf.format(files[i].lastModified()));
@@ -83,6 +89,19 @@ public class Utility {
 
     public static void createDatabaseObject(Context context){
         dbo = new DatabaseOperations(context);
+    }
+
+    public static String getOwner(String fileName){
+        SQLiteDatabase sqlDB = dbo.getReadableDatabase();
+        String[] columns = {TableData.TableInformation.ROWID, TableData.TableInformation.USER_EMAIL};
+        Cursor cursor = sqlDB.query(TableData.TableInformation.SHARED_FILES, columns,
+                TableData.TableInformation.FILE_NAME + " = '" + fileName + "'", null, null, null, null);
+        if(cursor.moveToFirst() || cursor.getCount() >= 1){
+            Log.d("Owner", cursor.getString(1));
+            return cursor.getString(1);
+        }
+        return null;
+
     }
 
     public static int getActualFileSize(String fileName){

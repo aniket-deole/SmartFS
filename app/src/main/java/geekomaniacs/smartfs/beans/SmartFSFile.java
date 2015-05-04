@@ -14,9 +14,10 @@ public class SmartFSFile {
     private File file;
     private RandomAccessFile rafFile;
     private String metadata;
-    private long downloadSize;
+    private double downloadSize;
     public static final Integer BLOCK_SIZE = 4096;
     private static final String TAG = "SmartFS";
+    private String owner;
 
     public SmartFSFile(File file) throws FileNotFoundException {
         // If synchronous required, check file modes from here:
@@ -56,11 +57,19 @@ public class SmartFSFile {
         }
     }
 
-    public long getDownloadSize() {
+    public double getDownloadSize() {
         return downloadSize;
     }
 
-    public void setDownloadSize(long downloadSize) {
+    public void setDownloadSize(double downloadSize) {
         this.downloadSize = downloadSize;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }

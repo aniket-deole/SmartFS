@@ -11,10 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import geekomaniacs.smartfs.FileOperationsActivity;

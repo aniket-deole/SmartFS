@@ -152,22 +152,12 @@ public class MainActivity extends Activity {
         PATH = Environment.getExternalStorageDirectory().toString();
 
 
-        new RegisterTask ().executeOnExecutor (AsyncTask.SERIAL_EXECUTOR, null);
+        new RegisterTask ().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, null);
 
         Intent i = new Intent(getApplicationContext(), MessageTransferServer.class);
         i.putExtra("process", "listen");
         getApplicationContext().startService(i);
 
-        Button button = (Button) findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), MessageTransferServer.class);
-                i.putExtra("username", username);
-                getApplicationContext().startService(i);
-
-            }
-        });
     }
 
 
@@ -221,10 +211,12 @@ public class MainActivity extends Activity {
                 break;
             case R.id.download:
                 String fileName = mDataset.get(Utility.position).getFile().getName();
+                String owner = mDataset.get(Utility.position).getOwner();
                 Log.d("Download", fileName);
                 Intent intent = new Intent(getApplicationContext(), MessageTransferServer.class);
-                intent.putExtra("username", username);
+                intent.putExtra("requester", username);
                 intent.putExtra("filename", fileName);
+                intent.putExtra("owner", owner);
                 getApplicationContext().startService(intent);
         }
         return true;

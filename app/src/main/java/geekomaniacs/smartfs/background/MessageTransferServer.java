@@ -25,7 +25,7 @@ import geekomaniacs.smartfs.message.FilePartUDPMessage;
 import geekomaniacs.smartfs.message.MessageResolver;
 import geekomaniacs.smartfs.message.PayloadExceededException;
 import geekomaniacs.smartfs.message.UDPMessage;
-import geekomaniacs.smartfs.utility.Utility;
+
 
 /**
  * Created by aniket on 5/2/15.
@@ -37,7 +37,8 @@ public class MessageTransferServer extends Service {
     private volatile boolean detailsReceived;
     String foreignIp;
     String foreignPort;
-    String username;
+    String requester;
+    String owner;
     String fileName;
 
     @Override
@@ -49,9 +50,10 @@ public class MessageTransferServer extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String process = intent.getExtras().getString("process");
         if (process == null) {
-            username = intent.getExtras().getString("username");
+            requester = intent.getExtras().getString("requester");
             fileName = intent.getExtras().getString("filename");
-            Log.d(username, fileName);
+            owner = intent.getExtras().getString("owner");
+            Log.d(requester, fileName);
             new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
                     null);
         } else {
@@ -64,9 +66,6 @@ public class MessageTransferServer extends Service {
 
     @Override
     public void onCreate () {
-
-
-
 
     }
 
@@ -183,12 +182,8 @@ public class MessageTransferServer extends Service {
         protected Void doInBackground(Void... params) {
             try {
                 ArrayList<NameValuePair> postParameters = new  ArrayList<>();
-                String fEmail;
-                if (username.equalsIgnoreCase("aniket.deole@gmail.com")) {
-                    fEmail = "shwetajo@buffalo.edu";
-                }else {
-                    fEmail = "aniket.deole@gmail.com";
-                }
+                String fEmail = owner;
+
                 postParameters.add(new BasicNameValuePair("email", fEmail));
                 String response = CustomHttpClient.executeHttpPost("http://aniketdeole.in/sfs_getipport.php",
                         postParameters);
