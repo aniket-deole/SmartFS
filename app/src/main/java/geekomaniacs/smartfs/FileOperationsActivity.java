@@ -3,6 +3,7 @@ package geekomaniacs.smartfs;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ public class FileOperationsActivity extends ActionBarActivity {
     String dateModified;
     Button share;
     Button delete;
+    Button open;
     Context context;
 
     @Override
@@ -52,6 +54,8 @@ public class FileOperationsActivity extends ActionBarActivity {
         sharedToUsers = (EditText) findViewById(R.id.user_email_id);
         share = (Button) findViewById(R.id.shareButton);
         delete = (Button) findViewById(R.id.deleteButton);
+        open = (Button) findViewById(R.id.openButton);
+
         final DatabaseOperations dbo = new DatabaseOperations(this);
 
         share.setOnClickListener(new View.OnClickListener() {
@@ -85,6 +89,16 @@ public class FileOperationsActivity extends ActionBarActivity {
                 String[] user_emails = sharedToUsers.getText().toString().split(",");
                 if(dbo.deleteFromSharedUsersTables(dbo, fileName, user_emails) == 1)
                     Toast.makeText(context, "Unshared successfully", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        open.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri uri = Uri.parse("file://" + Utility.path + Utility.FORWARD_SLASH + fileName);
+                intent.setDataAndType(uri, "text/plain");
+                startActivity(intent);
             }
         });
 

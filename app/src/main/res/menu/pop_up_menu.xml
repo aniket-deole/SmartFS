@@ -8,5 +8,8 @@
         android:id="@+id/delete"
         android:title="Delete"
         />
-
+    <item
+        android:id="@+id/download"
+        android:title="Download"
+        />
 </menu>

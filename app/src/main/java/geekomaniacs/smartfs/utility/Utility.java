@@ -29,12 +29,13 @@ public class Utility {
     public static final String BODY = "Hello, a user has shared a file with you\n";
     public static final String SHARED_FILE_LINK = "Please click the following link to add the file to SmartFS\nhttp://www.aniketdeole.in/";
     public static final String FORWARD_SLASH = "/";
-
+    public static final String DOWNLOAD = "Download";
+    public static String path;
     public static int position;
 
     public static ArrayList<SmartFSFile> getFileList() {
         ArrayList<SmartFSFile> smartFSFiles = new ArrayList<SmartFSFile>();
-        String path = Environment.getExternalStorageDirectory().toString() + SMART_FS_DIRECTORY;
+        path = Environment.getExternalStorageDirectory().toString() + SMART_FS_DIRECTORY;
         Log.d(MainActivity.TAG, "Path: " + path);
         File smartFSDirectory = new File(path);
         if (!smartFSDirectory.exists()) {

@@ -2,6 +2,7 @@ package geekomaniacs.smartfs;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,14 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
 import geekomaniacs.smartfs.database.DatabaseOperations;
 import geekomaniacs.smartfs.utility.Utility;
@@ -34,6 +43,18 @@ public class NewFileSharedActivity extends ActionBarActivity {
         dbo.insertIntoSharedUsersTable(dbo, fileName, sharedBy);
         TextView sharedByText = (TextView) findViewById(R.id.shared_by);
         sharedByText.setText("The user: " + sharedBy[0] + " has shared file: " + fileName + " with you.");
+        File file = new File(Environment.getExternalStorageDirectory().toString() +
+                Utility.SMART_FS_DIRECTORY + Utility.FORWARD_SLASH + fileName);
+        try {
+            if(file.createNewFile()){
+                Log.d("Created", "file");
+            }
+            else
+                Log.d("Not created", "file");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

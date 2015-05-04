@@ -25,6 +25,7 @@ import geekomaniacs.smartfs.message.FilePartUDPMessage;
 import geekomaniacs.smartfs.message.MessageResolver;
 import geekomaniacs.smartfs.message.PayloadExceededException;
 import geekomaniacs.smartfs.message.UDPMessage;
+import geekomaniacs.smartfs.utility.Utility;
 
 /**
  * Created by aniket on 5/2/15.
@@ -37,6 +38,7 @@ public class MessageTransferServer extends Service {
     String foreignIp;
     String foreignPort;
     String username;
+    String fileName;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,6 +50,8 @@ public class MessageTransferServer extends Service {
         String process = intent.getExtras().getString("process");
         if (process == null) {
             username = intent.getExtras().getString("username");
+            fileName = intent.getExtras().getString("filename");
+            Log.d(username, fileName);
             new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
                     null);
         } else {
@@ -137,7 +141,7 @@ public class MessageTransferServer extends Service {
 
                 UDPMessage requestFileDetails = new FileMetadataRequestUDPMessage(Integer.parseInt(foreignPort),
                         InetAddress.getByName(foreignIp),
-                        "scarlett-johansson-5054-1920x1200.jpg"
+                        fileName
                 );
 
                 FileMetadataUDPMessage fileDetails = (FileMetadataUDPMessage) requestFileDetails.sendAndWait();

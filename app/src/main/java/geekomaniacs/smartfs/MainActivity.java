@@ -67,7 +67,6 @@ public class MainActivity extends Activity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     public static String PATH;
-    private Integer messageCounter = 0;
     private int myPort;
     ArrayList<SmartFSFile> mDataset;
     public static String username;
@@ -133,14 +132,14 @@ public class MainActivity extends Activity {
         );*/
 
         // specify an adapter (see also next example)
-//        ArrayList<SmartFSFile> mDataset = Utility.getFileList();
-        mDataset = new ArrayList<SmartFSFile>();
+        mDataset = Utility.getFileList();
+        /*mDataset = new ArrayList<SmartFSFile>();
         try{
             mDataset.add(new SmartFSFile(new File("ABC")));
             mDataset.add(new SmartFSFile(new File("BCD")));
         }catch(FileNotFoundException e){
             Log.e("No file","No file");
-        }
+        }*/
 
         mAdapter = new MyAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
@@ -168,7 +167,6 @@ public class MainActivity extends Activity {
 
             }
         });
-
     }
 
 
@@ -194,12 +192,6 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void showPopUp(View view) {
-        PopupMenu popUp = new PopupMenu(this, view);
-        popUp.inflate(R.menu.pop_up_menu);
-        popUp.show();
-    }
-
 
     public static String genHashWrapper(String input) {
         String hashed = "";
@@ -222,8 +214,17 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.share){
-            Log.d(MainActivity.TAG, mDataset.get(Utility.position).getFile().getName());
+        switch(item.getItemId()){
+            case R.id.share:
+                Log.d("Share", mDataset.get(Utility.position).getFile().getName());
+                break;
+            case R.id.download:
+                String fileName = mDataset.get(Utility.position).getFile().getName();
+                Log.d("Download", fileName);
+                Intent intent = new Intent(getApplicationContext(), MessageTransferServer.class);
+                intent.putExtra("username", username);
+                intent.putExtra("filename", fileName);
+                getApplicationContext().startService(intent);
         }
         return true;
     }
