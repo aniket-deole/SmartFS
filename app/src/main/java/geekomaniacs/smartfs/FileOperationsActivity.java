@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,10 +20,13 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.URLEncoder;
+
 import geekomaniacs.smartfs.database.DatabaseOperations;
 import geekomaniacs.smartfs.database.TableData;
 import geekomaniacs.smartfs.mail.GmailSender;
 import geekomaniacs.smartfs.utility.Utility;
+
 
 
 public class FileOperationsActivity extends ActionBarActivity {
@@ -67,10 +71,11 @@ public class FileOperationsActivity extends ActionBarActivity {
                     new AsyncTask<Void, Void, Void>() {
                         @Override public Void doInBackground(Void... arg) {
                             try {
-                                sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY +
-                                        Utility.SHARED_FILE_LINK + MainActivity.username +
+                                byte[] temp = (MainActivity.username +
                                         Utility.FORWARD_SLASH + fileName + Utility.FORWARD_SLASH +
-                                        fileSize + Utility.FORWARD_SLASH + dateModified, Utility.USERNAME,
+                                        fileSize + Utility.FORWARD_SLASH + dateModified).getBytes();
+                                String url = Utility.SHARED_FILE_LINK + Utility.encode(temp);
+                                sender.sendMail(Utility.SUBJECT + fileName, Utility.BODY + url, Utility.USERNAME,
                                         sharedToUsers.getText().toString());
                             } catch (Exception e) {
                                 Log.e("SendMail", e.getMessage(), e);

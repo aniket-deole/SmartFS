@@ -33,15 +33,19 @@ public class NewFileSharedActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_file_shared);
+        Utility.createDatabaseObject(this);
         Intent intent = getIntent();
         data = intent.getData();
         final DatabaseOperations dbo = new DatabaseOperations(this);
-        String[] path = data.getPath().split(Utility.FORWARD_SLASH);
+        String toDecode = data.getPath().substring(data.getPath().lastIndexOf(Utility.FORWARD_SLASH) + 1);
+        String temp = new String(Utility.decode(toDecode));
         String[] sharedBy = new String[1];
-        sharedBy[0] = path[1];
-        String fileName = path[2];
-        String fileSize = path[3];
-        String dateModified = path[4];
+        String path[] = temp.split(Utility.FORWARD_SLASH);
+        sharedBy[0] = path[0];
+        String fileName = path[1];
+        String fileSize = path[2];
+        String dateModified = path[3] + "-" + path[4] + "-" + path[5];
+        Log.d("Date", dateModified);
         dbo.insertIntoSharedUsersTable(dbo, fileName, sharedBy);
         TextView sharedByText = (TextView) findViewById(R.id.shared_by);
         sharedByText.setText("The user: " + sharedBy[0] + " has shared file: " + fileName + " with you.");

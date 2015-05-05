@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import geekomaniacs.smartfs.MainActivity;
 import geekomaniacs.smartfs.beans.SmartFSFile;
 import geekomaniacs.smartfs.database.DatabaseOperations;
 import geekomaniacs.smartfs.database.TableData;
+
 
 /**
  * Created by imbapumba on 4/20/15.
@@ -32,8 +34,8 @@ public class Utility {
     public static final String USERNAME = "smartfs2015@gmail.com";
     public static final String PASSWORD = "geekomaniacs";
     public static final String SUBJECT = "SmartFS: A new file has been shared with you:- ";
-    public static final String BODY = "Hello, a user has shared a file with you\n";
-    public static final String SHARED_FILE_LINK = "Please click the following link to add the file to SmartFS\nhttp://www.aniketdeole.in/";
+    public static final String BODY = "Hello, a user has shared a file with you\nPlease click the following link to add the file to SmartFS\n";
+    public static final String SHARED_FILE_LINK = "http://www.aniketdeole.in/";
     public static final String FORWARD_SLASH = "/";
     public static final String DOWNLOAD = "Download";
     public static final String SPACE = " ";
@@ -116,5 +118,13 @@ public class Utility {
         }else{
             return -1;
         }
+    }
+
+    public static String encode(byte[] temp) {
+        return new String(Base64.encode(temp, 0));
+    }
+
+    public static byte[] decode(String toDecode) {
+        return Base64.decode(toDecode.getBytes(), 0);
     }
 }
