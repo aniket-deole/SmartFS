@@ -107,6 +107,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         for (SmartFSFile sfs : mDataset) {
             if (sfs.getFile().getName().equals(name)) {
                 sfs.setDownloadSize(done);
+                this.notifyDataSetChanged();
             }
         }
     }

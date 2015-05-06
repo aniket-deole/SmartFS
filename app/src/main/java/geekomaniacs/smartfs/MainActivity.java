@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -88,6 +89,8 @@ public class MainActivity extends Activity {
     GetPartsReceiver gpr;
     String regid;
 
+    boolean getDetails = true;
+
     private Map<String, Integer> percentMap;
 
 
@@ -97,7 +100,9 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         Utility.createDatabaseObject(this);
         Intent intent = getIntent();
-        username = intent.getExtras().getString("username");
+        if (intent.getExtras() != null) {
+            username = intent.getExtras().getString("username");
+        }
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -231,6 +236,7 @@ public class MainActivity extends Activity {
                 intent.putExtra("filename", fileName);
                 intent.putExtra("owner", owner);
                 getApplicationContext().startService(intent);
+//                new GetDetailsTask().executeOnExecutor (AsyncTask.THREAD_POOL_EXECUTOR, null);
         }
         return true;
     }
@@ -394,8 +400,45 @@ public class MainActivity extends Activity {
             String fName = arg1.getStringExtra("FileName");
             percentMap.put(fName, partsCompleted);
             MyAdapter ma = (MyAdapter) mAdapter;
+            Log.v (TAG, "Total " + partsCompleted + ": Completed");
             ma.setPercent(fName, partsCompleted);
+            if (partsCompleted >= 100)
+                getDetails = false;
         }
 
     }
+
+
+
+    private class GetDetailsTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            while (getDetails) {
+                try {
+                    Thread.sleep(2000);
+                    Intent intent = new Intent(MainActivity.this,
+                            MessageTransferServer.class);
+                    intent.putExtra("process", "getStatus");
+                    startService(intent);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+    }
+
+
+    @Override
+    protected void onStop() {
+        // TODO Auto-generated method stub
+        try {
+            if (gpr != null) {
+                unregisterReceiver(gpr);
+                gpr = null;
+            }
+        } catch (IllegalArgumentException E) {}
+        super.onStop();
+    }
+
 }

@@ -17,6 +17,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import geekomaniacs.smartfs.CustomHttpClient;
 import geekomaniacs.smartfs.FilePartRequestUDPMessage;
@@ -53,27 +56,31 @@ public class MessageTransferServer extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String process = intent.getExtras().getString("process");
-        if (process == null) {
-            requester = intent.getExtras().getString("requester");
-            fileName = intent.getExtras().getString("filename");
-            owner = intent.getExtras().getString("owner");
-            Log.d(TAG, requester + ":" + fileName);
-            new FileTransfer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    null);
-        } else if (process.equalsIgnoreCase("getStatus")) {
-            fileName = intent.getExtras().getString ("filename");
-            Log.d (TAG, "Requesting status for file Name");
-            Intent intent2 = new Intent();
-            intent2.setAction(PartsDownloaded);
-
-            intent.putExtra("PercentCompleted", partsDownloaded.get(fileName));
-            intent.putExtra("FileName", fileName);
-
-            sendBroadcast(intent);
+        if (intent.getExtras () == null) {
+            Log.v (TAG, "Received: request for intent get extra is null:");
         } else {
-            new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    1);
+            String process = intent.getExtras().getString("process");
+            if (process == null) {
+                requester = intent.getExtras().getString("requester");
+                fileName = intent.getExtras().getString("filename");
+                owner = intent.getExtras().getString("owner");
+                Log.d(TAG, requester + ":" + fileName);
+                new FileTransfer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        null);
+            } else if (intent.getExtras().getString("process").equalsIgnoreCase("getStatus")) {
+                fileName = intent.getExtras().getString("filename");
+                Log.d(TAG, "Requesting status for file Name");
+                Intent intent2 = new Intent();
+                intent2.setAction(PartsDownloaded);
+
+                intent.putExtra("PercentCompleted", partsDownloaded.get(fileName));
+                intent.putExtra("FileName", fileName);
+
+                sendBroadcast(intent);
+            } else {
+                new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        1);
+            }
         }
 
         return 0;
@@ -143,13 +150,13 @@ public class MessageTransferServer extends Service {
             try {
 
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
                 detailsReceived = false;
-                new GetIpAndPortTask ().executeOnExecutor (AsyncTask.THREAD_POOL_EXECUTOR, null);
+                new GetIpAndPortTask ().executeOnExecutor (Executors.newFixedThreadPool(10));
                 while (!detailsReceived) {};
 
                 Log.v (TAG, "Now starting to receive file.");
