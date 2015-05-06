@@ -1,7 +1,9 @@
 package geekomaniacs.smartfs;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -10,6 +12,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -41,7 +44,9 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,8 +64,6 @@ import geekomaniacs.smartfs.utility.Utility;
 
 
 public class MainActivity extends Activity {
-    public static final String IP1 = "192.168.1.18";
-    public static final String IP2 = "192.168.1.10";
     public static final String TAG = "SmartFS";
     private static final Integer SERVER_PORT = 10003;
     private RecyclerView mRecyclerView;
@@ -81,7 +84,11 @@ public class MainActivity extends Activity {
 
     Context context;
     String myIp;
+
+    GetPartsReceiver gpr;
     String regid;
+
+    private Map<String, Integer> percentMap;
 
 
     @Override
@@ -102,6 +109,11 @@ public class MainActivity extends Activity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         context = getApplicationContext();
+        gpr = new GetPartsReceiver();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MessageTransferServer.PartsDownloaded);
+        registerReceiver(gpr, intentFilter);
 
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -132,6 +144,7 @@ public class MainActivity extends Activity {
                 }
         );*/
 
+        percentMap = new HashMap<>();
         // specify an adapter (see also next example)
         mDataset = Utility.getFileList();
         /*mDataset = new ArrayList<SmartFSFile>();
@@ -370,5 +383,19 @@ public class MainActivity extends Activity {
         editor.putString(PROPERTY_REG_ID, regId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
         editor.commit();
+    }
+    private class GetPartsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            // TODO Auto-generated method stub
+
+            int partsCompleted = arg1.getIntExtra("PercentCompleted", 0);
+            String fName = arg1.getStringExtra("FileName");
+            percentMap.put(fName, partsCompleted);
+            MyAdapter ma = (MyAdapter) mAdapter;
+            ma.setPercent(fName, partsCompleted);
+        }
+
     }
 }

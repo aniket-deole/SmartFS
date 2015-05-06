@@ -103,7 +103,7 @@ public class FileOperationsActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 Uri uri = Uri.parse("file://" + Utility.path + Utility.FORWARD_SLASH + fileName);
-                intent.setDataAndType(uri, "text/plain");
+                intent.setDataAndType(uri, "*/*");
                 startActivity(intent);
             }
         });

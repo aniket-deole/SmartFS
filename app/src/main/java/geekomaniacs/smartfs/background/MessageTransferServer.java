@@ -15,6 +15,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import geekomaniacs.smartfs.CustomHttpClient;
 import geekomaniacs.smartfs.FilePartRequestUDPMessage;
@@ -33,6 +35,7 @@ import geekomaniacs.smartfs.message.UDPMessage;
 public class MessageTransferServer extends Service {
 
     public static final String TAG = "SmartFS";
+    public static final String PartsDownloaded = "PartsDownloaded";
     private static final Integer SERVER_PORT = 10003;
     private volatile boolean detailsReceived;
     String foreignIp;
@@ -40,6 +43,8 @@ public class MessageTransferServer extends Service {
     String requester;
     String owner;
     String fileName;
+
+    private Map<String, Integer> partsDownloaded;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,9 +58,19 @@ public class MessageTransferServer extends Service {
             requester = intent.getExtras().getString("requester");
             fileName = intent.getExtras().getString("filename");
             owner = intent.getExtras().getString("owner");
-            Log.d(requester, fileName);
-            new FileTransfer().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+            Log.d(TAG, requester + ":" + fileName);
+            new FileTransfer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                     null);
+        } else if (process.equalsIgnoreCase("getStatus")) {
+            fileName = intent.getExtras().getString ("filename");
+            Log.d (TAG, "Requesting status for file Name");
+            Intent intent2 = new Intent();
+            intent2.setAction(PartsDownloaded);
+
+            intent.putExtra("PercentCompleted", partsDownloaded.get(fileName));
+            intent.putExtra("FileName", fileName);
+
+            sendBroadcast(intent);
         } else {
             new ServerSocketListener().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                     1);
@@ -66,6 +81,7 @@ public class MessageTransferServer extends Service {
 
     @Override
     public void onCreate () {
+        partsDownloaded = new HashMap<>();
 
     }
 
@@ -159,6 +175,7 @@ public class MessageTransferServer extends Service {
                     try {
                         filePart.handle();
                         Log.v (TAG, "Handled part:" + i);
+                        partsDownloaded.put(fileDetails.fileName, (int) ((i / totalParts) * 100));
                     } catch (PayloadExceededException e) {
                         Log.e (TAG, "FTDIB:", e);
                     }
@@ -167,9 +184,9 @@ public class MessageTransferServer extends Service {
 
 
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                Log.e (TAG, "UHE:", e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log. e(TAG, "IOE:", e);
             }
             return null;
         }

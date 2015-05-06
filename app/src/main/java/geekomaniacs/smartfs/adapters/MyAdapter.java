@@ -102,4 +102,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             Utility.position = getPosition();
         }
     }
+
+    public void setPercent (String name, Integer done) {
+        for (SmartFSFile sfs : mDataset) {
+            if (sfs.getFile().getName().equals(name)) {
+                sfs.setDownloadSize(done);
+            }
+        }
+    }
 }
