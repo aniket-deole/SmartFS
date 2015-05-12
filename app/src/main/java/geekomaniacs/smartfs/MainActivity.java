@@ -441,4 +441,23 @@ public class MainActivity extends Activity {
         super.onStop();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MessageTransferServer.PartsDownloaded);
+        registerReceiver(gpr, intentFilter);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        try {
+            if (gpr != null) {
+                unregisterReceiver(gpr);
+                gpr = null;
+            }
+        } catch (IllegalArgumentException E) {}
+    }
+
 }
